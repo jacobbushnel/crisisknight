@@ -55,7 +55,7 @@ Per Hostinger's Node.js web app docs (docs.hostinger.com/node.js):
    - Output directory: leave empty
    - Entry file: `server.mjs`
    - Fallback if Express will not run the build: application type **Other**, same entry file and build script.
-3. Environment variables (see `.env.example`): `TURNSTILE_SITEKEY`, `TURNSTILE_SECRET`, `CONTACT_TO`, `CONTACT_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SITE_ORIGIN=https://crisisknight.com` (comma-separate extra origins such as `https://www.crisisknight.com`), `NODE_ENV=production`. Set `CONTACT_FROM` to the same mailbox as `SMTP_USER`, since SMTP servers often reject mismatched senders. `PORT` is assigned by Hostinger.
+3. Environment variables (see `.env.example`): `TURNSTILE_SITEKEY`, `TURNSTILE_SECRET`, `CONTACT_TO`, `CONTACT_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SITE_ORIGIN=https://crisisknight.com` (the first entry is the canonical host: `www.` of it redirects there with a 301; extra origins can be comma-separated), `NODE_ENV=production`. Set `CONTACT_FROM` to the same mailbox as `SMTP_USER`, since SMTP servers often reject mismatched senders. `PORT` is assigned by Hostinger.
 4. Connect the `crisisknight.com` domain and confirm HTTPS.
 5. After the first deploy, check `TRUST_PROXY`. It defaults to `1` (one reverse proxy). If every visitor appears to share one rate-limit bucket, or `X-Forwarded-For` can be spoofed, adjust it.
 

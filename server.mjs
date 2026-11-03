@@ -18,6 +18,16 @@ app.disable('x-powered-by');
 const trust = process.env.TRUST_PROXY ?? '1';
 app.set('trust proxy', Number.isNaN(Number(trust)) ? trust : Number(trust));
 
+// One canonical host. Only www.<our domain> is redirected, never an arbitrary
+// Host header value, so this cannot be used as an open redirect.
+const canonical = new URL((process.env.SITE_ORIGIN ?? 'https://crisisknight.com').split(',')[0].trim());
+app.use((req, res, next) => {
+  if (req.hostname === `www.${canonical.hostname}`) {
+    return res.redirect(301, `${canonical.origin}${req.originalUrl}`);
+  }
+  next();
+});
+
 const csp = [
   "default-src 'self'",
   "script-src 'self' https://challenges.cloudflare.com",
