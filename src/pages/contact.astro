@@ -1,0 +1,106 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Rendered per request so the Turnstile site key comes from runtime env vars.
+export const prerender = false;
+
+const sitekey = process.env.TURNSTILE_SITEKEY ?? '';
+---
+
+<Base title="Contact" description="Request a conversation about an engagement or subcontracting opportunity.">
+  <Fragment slot="head">
+    {sitekey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />}
+  </Fragment>
+
+  <section class="block">
+    <div class="wrap">
+      <p class="eyebrow">Contact</p>
+      <h1>Request a conversation</h1>
+      <p class="muted prose">
+        Tell me about the engagement, timeline and scope. Messages go straight to my inbox and I reply personally, usually within two business days.
+      </p>
+
+      <form id="contact-form" class="form" method="post" action="/api/contact" novalidate>
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" required maxlength="100" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required maxlength="254" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="organization">Organization <span class="opt">(optional)</span></label>
+          <input id="organization" name="organization" type="text" maxlength="150" autocomplete="organization" />
+        </div>
+        <div class="field">
+          <label for="topic">Topic</label>
+          <select id="topic" name="topic" required>
+            <option value="subcontracting">Subcontracting opportunity</option>
+            <option value="scoping">Scoping an engagement</option>
+            <option value="other">Something else</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" required minlength="20" maxlength="5000"></textarea>
+        </div>
+
+        <div class="hp" aria-hidden="true">
+          <label for="website">Leave this field empty</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        {sitekey
+          ? <div class="cf-turnstile" data-sitekey={sitekey} data-theme="dark"></div>
+          : <p class="status err">Spam protection is not configured, so the form is disabled.</p>}
+
+        <div id="form-status" class="status" role="status" aria-live="polite" hidden></div>
+        <div><button class="btn" type="submit" disabled={!sitekey}>Send request</button></div>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+  const status = document.getElementById('form-status') as HTMLElement | null;
+
+  function show(kind: 'ok' | 'err', text: string) {
+    if (!status) return;
+    status.hidden = false;
+    status.className = `status ${kind}`;
+    status.textContent = text;
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+
+    const button = form.querySelector('button[type=submit]') as HTMLButtonElement;
+    const data = Object.fromEntries(new FormData(form).entries());
+    const payload = { ...data, turnstile: data['cf-turnstile-response'] };
+    delete payload['cf-turnstile-response'];
+
+    button.disabled = true;
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok && body.ok) {
+        form.reset();
+        show('ok', 'Thanks. Your request was sent and I will reply by email.');
+      } else {
+        show('err', body.error || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      show('err', 'Network error. Please try again.');
+    } finally {
+      button.disabled = false;
+      (window as any).turnstile?.reset();
+    }
+  });
+</script>

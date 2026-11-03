@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+import { site, bio, experience, links } from '../data/site';
+---
+
+<Base title="About" description={`About ${site.owner}, security practitioner and founder of ${site.name}.`}>
+  <section class="block">
+    <div class="wrap prose">
+      <p class="eyebrow">About</p>
+      <h1>{site.owner}</h1>
+      {bio.map((p) => <p>{p}</p>)}
+      <p>
+        <a href={links.linkedin} rel="noopener noreferrer">LinkedIn</a> ·
+        <a href={links.github} rel="noopener noreferrer">GitHub</a> ·
+        <a href={links.giac} rel="noopener noreferrer">GIAC verification</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head"><h2>Experience</h2></div>
+      <ul class="timeline">
+        {experience.map((e) => (
+          <li class="card">
+            <span class="period">{e.period}</span>
+            <h3>{e.role}</h3>
+            <p class="muted">{e.org}</p>
+            <p>{e.summary}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2>Working with firms</h2>
+      <p class="muted">Looking to subcontract? Send a note describing the engagement, timeline and scope.</p>
+      <a class="btn" href="/contact">Request a conversation</a>
+    </div>
+  </section>
+</Base>

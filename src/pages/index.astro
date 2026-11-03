@@ -1,0 +1,79 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { site, services } from '../data/site';
+import { certs, isActive } from '../data/certs';
+
+const active = certs.filter((c) => isActive(c));
+const posts = (await getCollection('blog', ({ data }) => import.meta.env.DEV || !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+const fmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
+---
+
+<Base>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Security practitioner</p>
+      <h1>{site.tagline}</h1>
+      <p class="lead">{site.intro}</p>
+      <div class="actions">
+        <a class="btn" href="/contact">Request a conversation</a>
+        <a class="btn ghost" href="/certifications">View certifications</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head"><h2>What I do</h2></div>
+      <div class="grid">
+        {services.map((s) => (
+          <div class="card">
+            <h3>{s.title}</h3>
+            <p class="muted">{s.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Current certifications</h2>
+        <a href="/certifications">All credentials</a>
+      </div>
+      <div class="grid">
+        {active.map((c) => (
+          <div class="card cert">
+            <span class="code">{c.code}</span>
+            <span>{c.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {posts.length > 0 && (
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Latest write-ups</h2>
+          <a href="/blog">All posts</a>
+        </div>
+        <ul class="post-list">
+          {posts.map((p) => (
+            <li>
+              <a class="card" href={`/blog/${p.id}`}>
+                <time datetime={p.data.date.toISOString()}>{fmt.format(p.data.date)}</time>
+                <h3>{p.data.title}</h3>
+                <p class="muted">{p.data.description}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+</Base>

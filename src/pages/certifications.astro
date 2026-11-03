@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+import { certs, isActive, formatMonth } from '../data/certs';
+import { links } from '../data/site';
+
+const now = new Date();
+const active = certs.filter((c) => isActive(c, now));
+const inactive = certs.filter((c) => !isActive(c, now));
+---
+
+<Base title="Certifications" description="GIAC certifications held by Jacob Bushnell, with issue and expiry dates.">
+  <section class="block">
+    <div class="wrap">
+      <p class="eyebrow">Credentials</p>
+      <h1>Certifications</h1>
+      <p class="muted prose">
+        All credentials are issued by GIAC and can be verified on the{' '}
+        <a href={links.giac} rel="noopener noreferrer">GIAC certification record</a>, which is filed under the name Jake Bushnell.
+      </p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head"><h2>Active</h2></div>
+      <div class="grid">
+        {active.map((c) => (
+          <div class="card cert">
+            <span class="badge active">Active</span>
+            <span class="code">{c.code}</span>
+            <span>{c.name}</span>
+            <span class="meta">Earned {formatMonth(c.obtained)} · Expires {formatMonth(c.expires)}</span>
+            <span class="meta">Analyst no. {c.analyst}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="section-head"><h2>Previously held</h2></div>
+      <div class="grid">
+        {inactive.map((c) => (
+          <div class="card cert inactive">
+            <span class="badge">Expired</span>
+            <span class="code">{c.code}</span>
+            <span>{c.name}</span>
+            <span class="meta">Earned {formatMonth(c.obtained)} · Expired {formatMonth(c.expires)}</span>
+            <span class="meta">Analyst no. {c.analyst}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
